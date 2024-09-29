@@ -1,0 +1,25 @@
+package view
+
+import "viavia.io/platform"
+
+templ Landing(profile platform.Profile) {
+	<div class="h-screen flex flex-row flex-wrap">
+		<div class="basis-1/2 h-full bg-amber-800 flex justify-center items-center">
+			<p class="text-3xl text-center text-white">
+				Welcome to ALLMINDS
+			</p>
+			if profile.Nickname != "" {
+				<p class="text-3xl text-center text-white">
+					, <i>{ profile.Nickname }</i>
+				</p>
+			}
+		</div>
+		<div class="basis-1/2 flex justify-center items-center">
+			if profile.Nickname == "" {
+				<a class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xl font-medium text-amber-600 ring-1 ring-inset ring-amber-500/10" href="/login">SignIn</a>
+			} else {
+				<a class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xl font-medium text-amber-600 ring-1 ring-inset ring-amber-500/10" href="/login">Continue</a>
+			}
+		</div>
+	</div>
+}

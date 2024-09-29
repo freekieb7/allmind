@@ -1,0 +1,6 @@
+.idea
+.vscode
+tmp/*
+*.db
+.env
+*_templ.go
