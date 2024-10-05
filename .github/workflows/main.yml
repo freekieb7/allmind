@@ -1,0 +1,21 @@
+name: Clone project to VPS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clone:
+    name: run pull
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up SSH Key
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }} 
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.GIT_REPO_SSH_SECRET }}'
+          git clone git@github.com:freekieb7/allmind.git
