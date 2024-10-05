@@ -24,6 +24,6 @@ jobs:
           git checkout ${{ secrets.MAIN_BRANCH }}
           git pull
           docker compose build
-          SSL_CERTIFICATE=${{ secrets.SSL_CERTIFICATE }} \
-          SSL_CERTIFICATE_KEY=${{ secrets.SSL_CERTIFICATE_KEY }} \
+          SSL_CERTIFICATE=test \
+          SSL_CERTIFICATE_KEY=test2 \
           docker compose up -d
