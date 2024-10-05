@@ -1,7 +1,5 @@
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
 
 jobs:
   run_pull:
