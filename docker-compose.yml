@@ -4,7 +4,7 @@ services:
       context: nginx
     volumes:
       - ${SSL_CERTIFICATE}:/etc/nginx/ssl/freek.kuijpers.nl.pem
-      - ${SSL_CERTIFICATE_KEY}:/etc/nginx/ssl/freek.kuijpers.nl.key
+      - ${SSL_CERTIFICATE_KEY}:/etc/nginx/ssl/freek.kuijpers.nl.pem
     ports:
       - "80:80"
       - "443:443"
@@ -17,8 +17,8 @@ services:
       context: app
     volumes:
       - ./app:/app
-    environment:
-      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
-      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
-      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
-      AUTH0_CALLBACK_URL: ${AUTH0_CALLBACK_URL}
+    # environment:
+    #   AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+    #   AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+    #   AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+    #   AUTH0_CALLBACK_URL: ${AUTH0_CALLBACK_URL}
