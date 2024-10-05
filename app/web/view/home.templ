@@ -1,0 +1,17 @@
+package view
+
+import "viavia.io/platform"
+
+templ Home(profile platform.Profile) {
+	<div class="container mx-auto">
+		<div class="grid grid-cols-2 gap-4">
+			<div>
+				<img class="avatar" src={ profile.Picture }/>
+				<a id="qsLogoutBtn" class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a>
+			</div>
+			<div>
+				Col 2
+			</div>
+		</div>
+	</div>
+}

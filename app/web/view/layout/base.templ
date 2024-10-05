@@ -1,0 +1,27 @@
+package layout
+
+templ Base(title string, children ...templ.Component) {
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            <title>{title}</title>
+            
+            <script src="http://code.jquery.com/jquery-3.1.0.min.js" type="text/javascript"></script>
+            <script src="https://cdn.tailwindcss.com"></script>
+            
+            <script src="/public/js/js.cookie.js"></script>
+    	    <script src="/public/js/user.js"> </script>
+
+            <link rel="icon" type="image/x-icon" href="/public/image/favicon.ico">
+        </head>
+        <body>
+            for _, child := range children {
+                @child
+            }
+            <!-- htmx -->
+            <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        </body>
+    </html>
+}
