@@ -1,0 +1,29 @@
+name: Docker up on merge with master
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs:
+  vps_pull:
+    name: run pull
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up SSH Key
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }} 
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.GIT_REPO_SSH_SECRET }}'
+          cd ${{ secrets.WORK_DIR }}
+          git checkout ${{ secrets.MAIN_BRANCH }}
+          git pull
+          docker compose build
+          SSL_CERTIFICATE=${{ secrets.SSL_CERTIFICATE }} \
+          SSL_CERTIFICATE_KEY=${{ secrets.SSL_CERTIFICATE_KEY }} \
+          docker compose up -d
