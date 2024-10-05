@@ -4,7 +4,7 @@ services:
       context: nginx
     volumes:
       - ${SSL_CERTIFICATE}:/etc/nginx/ssl/freek.kuijpers.nl.pem
-      - ${SSL_CERTIFICATE_KEY}:/etc/nginx/ssl/freek.kuijpers.nl.pem
+      - ${SSL_CERTIFICATE_KEY}:/etc/nginx/ssl/freek.kuijpers.nl.key
     ports:
       - "80:80"
       - "443:443"
