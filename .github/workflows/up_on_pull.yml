@@ -26,4 +26,4 @@ jobs:
           docker compose build
           SSL_CERTIFICATE=${{ secrets.SSL_CERTIFICATE }} \
           SSL_CERTIFICATE_KEY=${{ secrets.SSL_CERTIFICATE_KEY }} \
-          docker compose up
+          docker compose up -d
