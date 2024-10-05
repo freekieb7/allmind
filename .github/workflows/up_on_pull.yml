@@ -1,9 +1,9 @@
-name: Clone project to VPS
+name: Docker up on merge with master
 
 on:
-  pull_request:
+  push:
     branches: 
-    - main
+      - main
 
 jobs:
   vps_pull:
