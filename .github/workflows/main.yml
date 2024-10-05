@@ -1,5 +1,7 @@
+name: Clone project to VPS
+
 on:
-  workflow_run:
+  workflow_dispatch:
 
 jobs:
   run_pull:
@@ -7,14 +9,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: install ssh keys
-      run: |
-        install -m 600 -D /dev/null ~/.ssh/id_rsa
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
-
-    - name: connect and pull
-      run: ssh ${{ secrets.SSH_USER }}@${{ SECRETS.SSH_HOST }} "cd ${{ secrets.WORK_DIR }}" && git checkout ${{ secrets.MAIN_BRANCH }} && git pull
-
-    - name: cleanup
-      run: rm -rf ~/.ssh
+    - name: Set up SSH Key
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }} 
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.PRIVATE_SSH_KEY }}'
+          git clone git@github.com:freekieb7/allmind.git
