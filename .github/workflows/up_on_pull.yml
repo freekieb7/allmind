@@ -20,6 +20,7 @@ jobs:
         script: |
           eval `ssh-agent -s`
           ssh-add - <<< '${{ secrets.GIT_REPO_SSH_SECRET }}'
+          cd ${{ secrets.WORK_DIR }}
           git checkout ${{ secrets.MAIN_BRANCH }}
           git pull
           docker compose build
