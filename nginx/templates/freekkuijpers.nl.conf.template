@@ -6,7 +6,7 @@ server {
     listen 80 default_server;
     listen [::]:80;
 
-    server_name freekkuijpers.nl;
+    server_name *.freekkuijpers.nl freekkuijpers.nl;
 
     return 301 https://$host$request_uri;
 }
@@ -18,14 +18,14 @@ server {
 
     http2 on;
 
-    server_name freekkuijpers.nl;
+    server_name *.freekkuijpers.nl freekkuijpers.nl;
 
     ssl_certificate /run/secrets/ssl_certificate;
     ssl_certificate_key /run/secrets/ssl_certificate_key;
 
     location / {
         proxy_set_header Host $host;
-        proxy_set_header X-FORWARDED-FOR $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
 
         proxy_pass http://app_upstream;
     }
