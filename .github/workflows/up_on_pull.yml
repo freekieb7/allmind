@@ -31,8 +31,8 @@ jobs:
           touch nginx/certs/freekkuijpers.nl.pem
           touch nginx/certs/freekkuijpers.nl.key
 
-          echo ${{ secrets.SSL_CERTIFICATE }} >> nginx/certs/freekkuijpers.nl.pem
-          echo ${{ secrets.SSL_CERTIFICATE_KEY }} >> nginx/certs/freekkuijpers.nl.key
+          echo "${{ secrets.SSL_CERTIFICATE }}" >> nginx/certs/freekkuijpers.nl.pem
+          echo "${{ secrets.SSL_CERTIFICATE_KEY }}" >> nginx/certs/freekkuijpers.nl.key
 
           # Start the services
           AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}                                                              \
