@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/gob"
+	"log"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -18,12 +19,18 @@ import (
 )
 
 // New registers the routes and returns the router.
-func New(auth *authenticator.Authenticator) *gin.Engine {
+func New() *gin.Engine {
 	router := gin.Default()
 
 	// To store custom types in our cookies,
 	// we must first register them using gob.Register
 	gob.Register(platform.Profile{})
+
+	// Create authenticator
+	auth, err := authenticator.New()
+	if err != nil {
+		log.Fatalf("Failed to initialize the authenticator: %v", err)
+	}
 
 	store := cookie.NewStore([]byte("secret"))
 	router.Use(sessions.Sessions("auth-session", store))
@@ -32,6 +39,8 @@ func New(auth *authenticator.Authenticator) *gin.Engine {
 
 	// Public pages
 	router.GET("/", landing.Handler)
+
+	router.GET("/api/health", func(ctx *gin.Context) { ctx.Status(200) })
 
 	// Authentication pages
 	router.GET("/login", login.Handler(auth))

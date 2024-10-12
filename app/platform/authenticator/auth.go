@@ -25,13 +25,20 @@ func New() (*Authenticator, error) {
 		return nil, err
 	}
 
+	secret, err := os.ReadFile("/run/secrets/auth0_client_secret")
+	if err != nil {
+		return nil, err
+	}
+
 	conf := oauth2.Config{
 		ClientID:     os.Getenv("AUTH0_CLIENT_ID"),
-		ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
+		ClientSecret: string(secret),
 		RedirectURL:  os.Getenv("AUTH0_CALLBACK_URL"),
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
+
+	secret = nil
 
 	return &Authenticator{
 		Provider: provider,

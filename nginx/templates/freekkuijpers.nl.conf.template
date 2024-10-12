@@ -20,8 +20,8 @@ server {
 
     server_name freekkuijpers.nl;
 
-    ssl_certificate /etc/nginx/ssl/freek.kuijpers.nl.pem;
-    ssl_certificate_key /etc/nginx/ssl/freek.kuijpers.nl.key;
+    ssl_certificate /run/secrets/ssl_certificate;
+    ssl_certificate_key /run/secrets/ssl_certificate_key;
 
     location / {
         proxy_set_header Host $host;

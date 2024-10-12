@@ -3,8 +3,10 @@ services:
     build:
       context: nginx
     volumes:
-      - ${SSL_CERTIFICATE}:/etc/nginx/ssl/freek.kuijpers.nl.pem
-      - ${SSL_CERTIFICATE_KEY}:/etc/nginx/ssl/freek.kuijpers.nl.key
+      - ./nginx/logs:/var/log/nginx
+    secrets:
+      - ssl_certificate
+      - ssl_certificate_key
     ports:
       - "80:80"
       - "443:443"
@@ -15,10 +17,43 @@ services:
   app:
     build:
       context: app
+      target: ${APP_ENV:-production}
+    depends_on:
+      - alloy
     volumes:
       - ./app:/app
-    # environment:
-    #   AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
-    #   AUTH0_DOMAIN: ${AUTH0_DOMAIN}
-    #   AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
-    #   AUTH0_CALLBACK_URL: ${AUTH0_CALLBACK_URL}
+    secrets:
+      - auth0_client_secret
+    environment:
+      OTEL_SERVICE_NAME: app
+      OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=production,service.version=0.1.0"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://alloy:4317"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      AUTH0_CALLBACK_URL: ${AUTH0_CALLBACK_URL}
+
+  alloy:
+    image: grafana/alloy:latest
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy
+      - ./nginx/logs:/var/log/nginx
+    command:
+      - run
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    secrets:
+      - grafana_cloud_api_key
+    environment:
+      GRAFANA_CLOUD_HOSTED_OTELCOL_ID: ${GRAFANA_CLOUD_HOSTED_OTELCOL_ID}
+      GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT: ${GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT}
+
+secrets:
+  ssl_certificate:
+    file: ./nginx/certs/freekkuijpers.nl.pem
+  ssl_certificate_key:
+    file: ./nginx/certs/freekkuijpers.nl.key
+  grafana_cloud_api_key:
+    environment: GRAFANA_CLOUD_API_KEY
+  auth0_client_secret:
+    environment: AUTH0_CLIENT_SECRET

@@ -18,14 +18,32 @@ jobs:
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
+          # Setup Git credentials
           eval `ssh-agent -s`
           ssh-add - <<< '${{ secrets.GIT_REPO_SSH_SECRET }}'
           cd ${{ secrets.WORK_DIR }}
-          git checkout ${{ secrets.MAIN_BRANCH }}
+
+          # Checkout
+          git checkout main
           git pull
-          SSL_CERTIFICATE=${{ secrets.SSL_CERTIFICATE }} \
-          SSL_CERTIFICATE_KEY=${{ secrets.SSL_CERTIFICATE_KEY }} \
-          docker compose build
-          SSL_CERTIFICATE=${{ secrets.SSL_CERTIFICATE }} \
-          SSL_CERTIFICATE_KEY=${{ secrets.SSL_CERTIFICATE_KEY }} \
-          docker compose up -d
+
+          # Create SSL keys 
+          touch nginx/certs/freekkuijpers.nl.pem
+          touch nginx/certs/freekkuijpers.nl.key
+
+          echo ${{ secrets.SSL_CERTIFICATE }}     > nginx/certs/freekkuijpers.nl.pem
+          echo ${{ secrets.SSL_CERTIFICATE_KEY }} > nginx/certs/freekkuijpers.nl.key
+
+          # Start the services
+          AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}                \
+          AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}          \
+          AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}  \
+          AUTH0_CALLBACK_URL=${{ secrets.AUTH0_CALLBACK_URL }}    \
+          GRAFANA_CLOUD_API_KEY=${{ secrets.GRAFANA_CLOUD_API_KEY }} \
+          GRAFANA_CLOUD_HOSTED_OTELCOL_ID=${{ secrets.GRAFANA_CLOUD_HOSTED_OTELCOL_ID }} \
+          GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT=${{ secrets.GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT }} \
+
+          docker compose up --build --detach
+
+          # Cleanup
+          rm -rf nginx/certs/*

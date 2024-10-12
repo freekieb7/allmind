@@ -10,31 +10,36 @@ RUN go mod download
 
 COPY ./ ./
 
+RUN go install github.com/a-h/templ/cmd/templ@latest
+RUN templ generate
+
 RUN CGO_ENABLED=0 GOOS=linux go build -o /allmind
+RUN CGO_ENABLED=0 GOOS=linux go build -C healthcheck -o /healthcheck
+
+# Run in development modes
+FROM build as development
+
+RUN go install github.com/air-verse/air@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+RUN go mod download
+
+CMD ["air", "-c", ".air.toml"]
 
 # Run the tests in the container
 FROM build AS test
 RUN go test -v ./...
 
 # Deploy the application binary into a lean image
-FROM scratch AS prod
+FROM scratch AS production
 
 WORKDIR /
 
 COPY --from=build /allmind /allmind
+COPY --from=build /healthcheck /healthcheck
+
+HEALTHCHECK --interval=5s --timeout=3s --start-period=2s --retries=3 CMD [ "/healthcheck" ]
 
 EXPOSE 3000
 
 ENTRYPOINT ["/allmind"]
-
-
-
-
-# RUN go install github.com/air-verse/air@latest
-# RUN go install github.com/go-delve/delve/cmd/dlv@latest
-# RUN go install github.com/a-h/templ/cmd/templ@latest
-
-# CMD ["air", "-c", ".air.toml"]
-
-# HEALTHCHECK --interval=5m --timeout=3s \
-#   CMD curl -f http://localhost:$HTTP_PORT/debug/vars || exit 1

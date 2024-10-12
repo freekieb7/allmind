@@ -8,4 +8,8 @@ down:
 	docker compose down
 
 gen-cert:
-	sudo openssl req -subj "/countryName=EN/stateOrProvinceName=Somewhere/organizationName=Personal/localityName=Somewhere/commonName=freekkuijpers.nl/organizationalUnitName=IT/emailAddress=freek@freekkuijpers.nl/" -x509 -nodes -days 3650 -newkey rsa:2048 -keyout ./nginx/private/freekkuijpers.nl.key -out ./nginx/certs/freekkuijpers.nl.pem
+	openssl req \
+	-x509 -nodes -days 3650 -newkey rsa:2048 \
+	-subj "/countryName=EN/stateOrProvinceName=Somewhere/organizationName=Personal/localityName=Somewhere/commonName=freekkuijpers.nl/organizationalUnitName=IT/emailAddress=freek@freekkuijpers.nl/" \
+	-keyout nginx/certs/freekkuijpers.nl.key \
+	-out nginx/certs/freekkuijpers.nl.pem
