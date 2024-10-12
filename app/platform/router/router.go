@@ -20,6 +20,8 @@ import (
 
 // New registers the routes and returns the router.
 func New() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 
 	// To store custom types in our cookies,

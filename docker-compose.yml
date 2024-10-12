@@ -12,7 +12,8 @@ services:
       - "443:443"
     restart: always
     depends_on:
-      - app
+      app:
+        condition: service_healthy
 
   app:
     build:

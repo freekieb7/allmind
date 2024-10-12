@@ -31,14 +31,14 @@ FROM build AS test
 RUN go test -v ./...
 
 # Deploy the application binary into a lean image
-FROM scratch AS production
+FROM gcr.io/distroless/base-debian12 AS production
 
 WORKDIR /
 
 COPY --from=build /allmind /allmind
 COPY --from=build /healthcheck /healthcheck
 
-HEALTHCHECK --interval=5s --timeout=3s --start-period=2s --retries=3 CMD [ "/healthcheck" ]
+HEALTHCHECK --interval=1s --timeout=3s --start-period=2s --retries=3 CMD [ "/healthcheck" ]
 
 EXPOSE 3000
 
