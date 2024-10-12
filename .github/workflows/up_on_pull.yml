@@ -43,6 +43,3 @@ jobs:
           GRAFANA_CLOUD_HOSTED_OTELCOL_ID=${{ secrets.GRAFANA_CLOUD_HOSTED_OTELCOL_ID }} \
           GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT=${{ secrets.GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT }} \
           docker compose up --build --detach
-
-          # Cleanup
-          rm -rf nginx/certs/*
