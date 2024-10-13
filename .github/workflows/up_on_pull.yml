@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: create a custom version using run number offset by 1000 (run_number + 1000)
+      run: |
+        echo "VERSION_NUMBER_WITH_OFFSET=$((1000+GITHUB_RUN_NUMBER))" >> $GITHUB_ENV
+
     - name: Set up SSH Key
       uses: appleboy/ssh-action@master
       with:
@@ -36,8 +40,9 @@ jobs:
 
           # Start the services
           APP_NAME=ALLMIND                                                                                      \
-          APP_VERSION=$((1000+GITHUB_RUN_NUMBER))                                                               \
+          APP_VERSION=${{ env.VERSION_NUMBER_WITH_OFFSET }}                                                     \
           APP_ENV=production                                                                                    \
+          SESSION_KEY=${{ secrets.SESSION_KEY }}                                                                \
           AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}                                                              \
           AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}                                                        \
           AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}                                                \
