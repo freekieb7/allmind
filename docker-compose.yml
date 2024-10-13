@@ -18,7 +18,7 @@ services:
   app:
     build:
       context: app
-      target: ${APP_ENV:-production}
+      target: ${APP_ENV}
     depends_on:
       - alloy
     volumes:
@@ -26,8 +26,9 @@ services:
     secrets:
       - auth0_client_secret
     environment:
+      SESSION_KEY: ${SESSION_KEY}
       OTEL_SERVICE_NAME: app
-      OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=production,service.version=0.1.0"
+      OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=${APP_ENV},service.version=${APP_VERSION}"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://alloy:4317"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       AUTH0_DOMAIN: ${AUTH0_DOMAIN}

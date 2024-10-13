@@ -16,6 +16,8 @@ RUN templ generate
 RUN CGO_ENABLED=0 GOOS=linux go build -o /allmind
 RUN CGO_ENABLED=0 GOOS=linux go build -C healthcheck -o /healthcheck
 
+HEALTHCHECK --interval=5s --timeout=3s --start-period=2s --retries=3 CMD [ "/healthcheck" ]
+
 # Run in development modes
 FROM build as development
 
@@ -37,8 +39,6 @@ WORKDIR /
 
 COPY --from=build /allmind /allmind
 COPY --from=build /healthcheck /healthcheck
-
-HEALTHCHECK --interval=1s --timeout=3s --start-period=2s --retries=3 CMD [ "/healthcheck" ]
 
 EXPOSE 3000
 

@@ -2,31 +2,28 @@ package router
 
 import (
 	"encoding/gob"
+	"encoding/json"
 	"log"
+	"net/http"
+	"os"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/gin"
-
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"viavia.io/platform"
 	"viavia.io/platform/authenticator"
-	"viavia.io/platform/middleware"
-	"viavia.io/web/app/callback"
-	"viavia.io/web/app/home"
-	"viavia.io/web/app/landing"
-	"viavia.io/web/app/login"
-	"viavia.io/web/app/logout"
+	"viavia.io/web/controller"
 )
 
 // New registers the routes and returns the router.
-func New() *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
+func New() *mux.Router {
+	// env := os.Getenv("APP_ENV")
 
-	router := gin.Default()
+	router := mux.NewRouter()
 
-	// To store custom types in our cookies,
-	// we must first register them using gob.Register
-	gob.Register(platform.Profile{})
+	sessionKey := os.Getenv("SESSION_KEY")
+	store := sessions.NewCookieStore([]byte(sessionKey))
+	store.Options.SameSite = http.SameSiteLaxMode
 
 	// Create authenticator
 	auth, err := authenticator.New()
@@ -34,22 +31,57 @@ func New() *gin.Engine {
 		log.Fatalf("Failed to initialize the authenticator: %v", err)
 	}
 
-	store := cookie.NewStore([]byte("secret"))
-	router.Use(sessions.Sessions("auth-session", store))
+	landingController := controller.LandingController{
+		CookieStore: store,
+	}
 
-	router.Static("/public", "web/static")
+	authenticationController := controller.AuthenticationController{
+		CookieStore:   store,
+		Authenticator: auth,
+	}
+
+	homeController := controller.HomeController{
+		CookieStore: store,
+	}
+
+	// To store custom types in our cookies,
+	// we must first register them using gob.Register
+	gob.Register(platform.Profile{})
+
+	router.Use(otelhttp.NewMiddleware("test"))
+
+	// router.Use(func(next http.Handler) http.Handler {
+	// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// 		attr := attribute.KeyValue{
+	// 			Key:   attribute.Key("http.route"),
+	// 			Value: attribute.StringValue(r.Pattern),
+	// 		}
+
+	// 		span := trace.SpanFromContext(r.Context())
+	// 		span.SetAttributes(attr)
+
+	// 		labeler, _ := otelhttp.LabelerFromContext(r.Context())
+	// 		labeler.Add(attr)
+
+	// 		next.ServeHTTP(w, r)
+	// 	})
+	// })
+
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 
 	// Public pages
-	router.GET("/", landing.Handler)
+	router.HandleFunc("/", landingController.ShowLanding).Methods("GET")
 
-	router.GET("/api/health", func(ctx *gin.Context) { ctx.Status(200) })
+	router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+	}).Methods("GET")
 
-	// Authentication pages
-	router.GET("/login", login.Handler(auth))
-	router.GET("/callback", callback.Handler(auth))
-	router.GET("/logout", logout.Handler)
+	// // Authentication pages
+	router.HandleFunc("/login", authenticationController.Login)
+	router.HandleFunc("/callback", authenticationController.Callback)
+	router.HandleFunc("/logout", authenticationController.Logout)
 
-	router.GET("/home", middleware.IsAuthenticated, home.Handler)
+	router.HandleFunc("/home", homeController.ShowHome).Methods("GET")
 
 	return router
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -40,10 +39,10 @@ func run() (err error) {
 	// Start HTTP server.
 	srv := &http.Server{
 		Addr:         "0.0.0.0:3000",
-		BaseContext:  func(_ net.Listener) context.Context { return ctx },
-		ReadTimeout:  time.Second,
-		WriteTimeout: 10 * time.Second,
-		Handler:      router.New().Handler(),
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+		Handler:      router.New(),
 	}
 
 	srvErr := make(chan error, 1)
@@ -66,27 +65,3 @@ func run() (err error) {
 	err = srv.Shutdown(context.Background())
 	return
 }
-
-// func newHTTPHandler() http.Handler {
-// 	mux := http.NewServeMux()
-
-// 	// handleFunc is a replacement for mux.HandleFunc
-// 	// which enriches the handler's HTTP instrumentation with the pattern as the http.route.
-// 	handleFunc := func(pattern string, handlerFunc func(http.ResponseWriter, *http.Request)) {
-// 		// Configure the "http.route" for the HTTP instrumentation.
-// 		handler := otelhttp.WithRouteTag(pattern, http.HandlerFunc(handlerFunc))
-// 		mux.Handle(pattern, handler)
-// 	}
-
-// 	// Register handlers.
-// 	mux.HandleFunc("/debug/pprof/", http.DefaultServeMux.ServeHTTP)
-// 	mux.HandleFunc("/debug/pprof/profile", http.DefaultServeMux.ServeHTTP)
-// 	mux.HandleFunc("/debug/pprof/heap", http.DefaultServeMux.ServeHTTP)
-
-// 	handleFunc("/rolldice/", rolldice)
-// 	handleFunc("/rolldice/{player}", rolldice)
-
-// 	// Add HTTP instrumentation for the whole server.
-// 	handler := otelhttp.NewHandler(mux, "/")
-// 	return handler
-// }
