@@ -38,6 +38,7 @@ FROM gcr.io/distroless/base-debian12 AS production
 WORKDIR /
 
 COPY --from=build /allmind /allmind
+COPY --from=build /app/web/static /web/static
 COPY --from=build /healthcheck /healthcheck
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=2s --retries=3 CMD [ "/healthcheck" ]
