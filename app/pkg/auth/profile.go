@@ -1,4 +1,4 @@
-package platform
+package auth
 
 type Profile struct {
 	Picture  string `json:"picture"`

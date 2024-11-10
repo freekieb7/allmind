@@ -11,7 +11,8 @@ import (
 
 	_ "net/http/pprof"
 
-	"viavia.io/platform/router"
+	"viavia.io/pkg/otel"
+	"viavia.io/pkg/router"
 )
 
 func main() {
@@ -26,7 +27,7 @@ func run() (err error) {
 	defer stop()
 
 	// Set up OpenTelemetry.
-	otelShutdown, err := setupOTelSDK(ctx)
+	otelShutdown, err := otel.SetupOTelSDK(ctx)
 	if err != nil {
 		return
 	}
@@ -38,7 +39,7 @@ func run() (err error) {
 
 	// Start HTTP server.
 	srv := &http.Server{
-		Addr:         "0.0.0.0:3000",
+		Addr:         ":3000",
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,

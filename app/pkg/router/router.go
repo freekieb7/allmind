@@ -10,9 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"viavia.io/platform"
-	"viavia.io/platform/authenticator"
-	"viavia.io/web/controller"
+	"viavia.io/pkg/auth"
+	"viavia.io/pkg/controllers"
 )
 
 // New registers the routes and returns the router.
@@ -26,46 +25,29 @@ func New() *mux.Router {
 	store.Options.SameSite = http.SameSiteLaxMode
 
 	// Create authenticator
-	auth, err := authenticator.New()
+	oauthProvider, err := auth.NewOAuthProvider()
 	if err != nil {
 		log.Fatalf("Failed to initialize the authenticator: %v", err)
 	}
 
-	landingController := controller.LandingController{
+	landingController := controllers.LandingController{
 		CookieStore: store,
 	}
 
-	authenticationController := controller.AuthenticationController{
+	authenticationController := controllers.AuthenticationController{
 		CookieStore:   store,
-		Authenticator: auth,
+		OAuthProvider: oauthProvider,
 	}
 
-	homeController := controller.HomeController{
+	homeController := controllers.HomeController{
 		CookieStore: store,
 	}
 
 	// To store custom types in our cookies,
 	// we must first register them using gob.Register
-	gob.Register(platform.Profile{})
+	gob.Register(auth.Profile{})
 
 	router.Use(otelhttp.NewMiddleware("test"))
-
-	// router.Use(func(next http.Handler) http.Handler {
-	// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 		attr := attribute.KeyValue{
-	// 			Key:   attribute.Key("http.route"),
-	// 			Value: attribute.StringValue(r.Pattern),
-	// 		}
-
-	// 		span := trace.SpanFromContext(r.Context())
-	// 		span.SetAttributes(attr)
-
-	// 		labeler, _ := otelhttp.LabelerFromContext(r.Context())
-	// 		labeler.Add(attr)
-
-	// 		next.ServeHTTP(w, r)
-	// 	})
-	// })
 
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 

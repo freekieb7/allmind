@@ -1,4 +1,4 @@
-package controller
+package controllers
 
 import (
 	"crypto/rand"
@@ -9,13 +9,12 @@ import (
 	"os"
 
 	"github.com/gorilla/sessions"
-	"viavia.io/platform"
-	"viavia.io/platform/authenticator"
+	"viavia.io/pkg/auth"
 )
 
 type AuthenticationController struct {
 	CookieStore   *sessions.CookieStore
-	Authenticator *authenticator.Authenticator
+	OAuthProvider *auth.OAuthProvider
 }
 
 func (controller *AuthenticationController) Login(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +43,7 @@ func (controller *AuthenticationController) Login(w http.ResponseWriter, r *http
 		return
 	}
 
-	w.Header().Add("Location", controller.Authenticator.AuthCodeURL(state))
+	w.Header().Add("Location", controller.OAuthProvider.AuthCodeURL(state))
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }
 
@@ -60,21 +59,21 @@ func (controller *AuthenticationController) Callback(w http.ResponseWriter, r *h
 	}
 
 	// Exchange an authorization code for a token.
-	token, err := controller.Authenticator.Exchange(r.Context(), r.URL.Query().Get("code"))
+	token, err := controller.OAuthProvider.Exchange(r.Context(), r.URL.Query().Get("code"))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("Failed to convert an authorization code into a token."))
 		return
 	}
 
-	idToken, err := controller.Authenticator.VerifyIDToken(r.Context(), token)
+	idToken, err := controller.OAuthProvider.VerifyIDToken(r.Context(), token)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to verify ID Token."))
 		return
 	}
 
-	var profile platform.Profile
+	var profile auth.Profile
 	if err := idToken.Claims(&profile); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))

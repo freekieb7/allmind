@@ -1,16 +1,12 @@
-package controller
+package controllers
 
 import (
 	"net/http"
 
-	"github.com/a-h/templ"
 	"github.com/gorilla/sessions"
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
-	"viavia.io/platform"
-	"viavia.io/web/view"
-	"viavia.io/web/view/layout"
 )
 
 type HomeController struct {
@@ -43,7 +39,7 @@ func (controller *HomeController) ShowHome(w http.ResponseWriter, r *http.Reques
 
 	logger.InfoContext(ctx, "home-to-ip", "result", r.RemoteAddr)
 
-	session, _ := controller.CookieStore.Get(r, "session-name")
-	profile := session.Values["profile"].(platform.Profile)
-	templ.Handler(layout.Base("Home", view.Home(profile))).ServeHTTP(w, r)
+	// session, _ := controller.CookieStore.Get(r, "session-name")
+	// profile := session.Values["profile"].(auth.Profile)
+	// templ.Handler(layout.Base("Home", template.Home(profile))).ServeHTTP(w, r)
 }

@@ -18,6 +18,7 @@ services:
   app:
     build:
       context: app
+      dockerfile: build/Dockerfile
       target: ${APP_ENV}
     depends_on:
       - alloy
@@ -27,7 +28,7 @@ services:
       - auth0_client_secret
     environment:
       SESSION_KEY: ${SESSION_KEY}
-      OTEL_SERVICE_NAME: app
+      OTEL_SERVICE_NAME: ${APP_NAME}
       OTEL_RESOURCE_ATTRIBUTES: "deployment.environment=${APP_ENV},service.version=${APP_VERSION}"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://alloy:4317"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"

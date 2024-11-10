@@ -1,4 +1,4 @@
-package authenticator
+package auth
 
 import (
 	"context"
@@ -10,13 +10,13 @@ import (
 )
 
 // Authenticator is used to authenticate our users.
-type Authenticator struct {
+type OAuthProvider struct {
 	*oidc.Provider
 	oauth2.Config
 }
 
 // New instantiates the *Authenticator.
-func New() (*Authenticator, error) {
+func NewOAuthProvider() (*OAuthProvider, error) {
 	provider, err := oidc.NewProvider(
 		context.Background(),
 		"https://"+os.Getenv("AUTH0_DOMAIN")+"/",
@@ -40,14 +40,14 @@ func New() (*Authenticator, error) {
 
 	secret = nil
 
-	return &Authenticator{
+	return &OAuthProvider{
 		Provider: provider,
 		Config:   conf,
 	}, nil
 }
 
 // VerifyIDToken verifies that an *oauth2.Token is a valid *oidc.IDToken.
-func (a *Authenticator) VerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
+func (a *OAuthProvider) VerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		return nil, errors.New("no id_token field in oauth2 token")

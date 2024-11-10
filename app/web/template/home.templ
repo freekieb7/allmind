@@ -1,8 +1,8 @@
-package view
+package template
 
-import "viavia.io/platform"
+import "viavia.io/pkg/auth"
 
-templ Home(profile platform.Profile) {
+templ Home(profile auth.Profile) {
 	<div class="container mx-auto">
 		<div class="grid grid-cols-2 gap-4">
 			<div>

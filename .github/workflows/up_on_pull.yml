@@ -1,56 +1,56 @@
-name: Docker up on merge with master
+# name: Docker up on merge with master
 
-on:
-  push:
-    branches: 
-      - main
+# on:
+#   push:
+#     branches: 
+#       - main
 
-jobs:
-  vps_pull:
-    name: run pull
-    runs-on: ubuntu-latest
+# jobs:
+#   vps_pull:
+#     name: run pull
+#     runs-on: ubuntu-latest
 
-    steps:
-    - name: create a custom version using run number offset by 1000 (run_number + 1000)
-      run: |
-        echo "VERSION_NUMBER_WITH_OFFSET=$((1000+GITHUB_RUN_NUMBER))" >> $GITHUB_ENV
+#     steps:
+#     - name: create a custom version using run number offset by 1000 (run_number + 1000)
+#       run: |
+#         echo "VERSION_NUMBER_WITH_OFFSET=$((1000+GITHUB_RUN_NUMBER))" >> $GITHUB_ENV
 
-    - name: Set up SSH Key
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SSH_HOST }} 
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          # Setup Git credentials
-          eval `ssh-agent -s`
-          ssh-add - <<< '${{ secrets.GIT_REPO_SSH_SECRET }}'
-          cd ${{ secrets.WORK_DIR }}
+#     - name: Set up SSH Key
+#       uses: appleboy/ssh-action@master
+#       with:
+#         host: ${{ secrets.SSH_HOST }} 
+#         username: ${{ secrets.SSH_USER }}
+#         key: ${{ secrets.SSH_PRIVATE_KEY }}
+#         script: |
+#           # Setup Git credentials
+#           eval `ssh-agent -s`
+#           ssh-add - <<< '${{ secrets.GIT_REPO_SSH_SECRET }}'
+#           cd ${{ secrets.WORK_DIR }}
 
-          # Checkout
-          git checkout main
-          git pull
+#           # Checkout
+#           git checkout main
+#           git pull
 
-          # Create SSL keys 
-          touch nginx/certs/freekkuijpers.nl.pem
-          touch nginx/certs/freekkuijpers.nl.key
+#           # Create SSL keys 
+#           touch nginx/certs/freekkuijpers.nl.pem
+#           touch nginx/certs/freekkuijpers.nl.key
 
-          echo "${{ secrets.SSL_CERTIFICATE }}" >> nginx/certs/freekkuijpers.nl.pem
-          echo "${{ secrets.SSL_CERTIFICATE_KEY }}" >> nginx/certs/freekkuijpers.nl.key
+#           echo "${{ secrets.SSL_CERTIFICATE }}" >> nginx/certs/freekkuijpers.nl.pem
+#           echo "${{ secrets.SSL_CERTIFICATE_KEY }}" >> nginx/certs/freekkuijpers.nl.key
 
-          # Start the services
-          APP_NAME=ALLMIND                                                                                      \
-          APP_VERSION=${{ env.VERSION_NUMBER_WITH_OFFSET }}                                                     \
-          APP_ENV=production                                                                                    \
-          SESSION_KEY=${{ secrets.SESSION_KEY }}                                                                \
-          AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}                                                              \
-          AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}                                                        \
-          AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}                                                \
-          AUTH0_CALLBACK_URL=${{ secrets.AUTH0_CALLBACK_URL }}                                                  \
-          GRAFANA_CLOUD_API_KEY=${{ secrets.GRAFANA_CLOUD_API_KEY }}                                            \
-          GRAFANA_CLOUD_HOSTED_OTELCOL_ID=${{ secrets.GRAFANA_CLOUD_HOSTED_OTELCOL_ID }}                        \
-          GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT=${{ secrets.GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT }}  \
-          docker compose up --build --detach --remove-orphans
+#           # Start the services
+#           APP_NAME=ALLMIND                                              a                                        \
+#           APP_VERSION=${{ env.VERSION_NUMBER_WITH_OFFSET }}                                                     \
+#           APP_ENV=production                                                                                    \
+#           SESSION_KEY=${{ secrets.SESSION_KEY }}                                                                \
+#           AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}                                                              \
+#           AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}                                                        \
+#           AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}                                                \
+#           AUTH0_CALLBACK_URL=${{ secrets.AUTH0_CALLBACK_URL }}                                                  \
+#           GRAFANA_CLOUD_API_KEY=${{ secrets.GRAFANA_CLOUD_API_KEY }}                                            \
+#           GRAFANA_CLOUD_HOSTED_OTELCOL_ID=${{ secrets.GRAFANA_CLOUD_HOSTED_OTELCOL_ID }}                        \
+#           GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT=${{ secrets.GRAFANA_CLOUD_HOSTED_OTELCOL_OTLP_ENDPOINT }}  \
+#           docker compose up --build --detach --remove-orphans
 
-          # Remove certs from project
-          rm -rf nginx/certs/*
+#           # Remove certs from project
+#           rm -rf nginx/certs/*

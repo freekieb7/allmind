@@ -1,8 +1,8 @@
-package view
+package template
 
-import "viavia.io/platform"
+import "viavia.io/pkg/auth"
 
-templ Landing(profile platform.Profile) {
+templ Landing(profile auth.Profile) {
 	<div class="h-screen flex flex-row flex-wrap">
 		<div class="basis-1/2 h-full bg-amber-800 flex justify-center items-center">
 			<p class="text-3xl text-center text-white">
